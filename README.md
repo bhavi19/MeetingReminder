@@ -1,2 +1,0 @@
-# MeetingReminder
-Your cat assistant 
