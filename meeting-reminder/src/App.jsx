@@ -2,6 +2,7 @@ import { useState } from "react";
 import Reminder from "./components/Reminder";
 import { playMeow } from "./utils/playAudio";
 import Overlay from "./components/Overlay";
+import Cat from "./components/cat";
 
 
 export default function App() {
@@ -9,22 +10,12 @@ export default function App() {
   const [showReminder, setShowReminder] = useState(false);
 
   const handleReminder = () => {
-    // Show only cat first
     setShowCat(true);
-    setShowReminder(false);
 
-    // After 2 seconds play meow and show reminder
     setTimeout(() => {
-     playMeow();
-
+      playMeow();
       setShowReminder(true);
     }, 2000);
-
-    // Auto close after 7 seconds total
-    setTimeout(() => {
-      setShowCat(false);
-      setShowReminder(false);
-    }, 7000);
   };
 
   return (
@@ -46,7 +37,9 @@ export default function App() {
       >
         Test Reminder
       </button>
+
       {showCat && <Overlay />}
+      {showCat && <Cat />}
       {showReminder && <Reminder />}
     </div>
   );
