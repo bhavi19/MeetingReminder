@@ -3,9 +3,8 @@ import Reminder from "./components/Reminder";
 import { playMeow } from "./utils/playAudio";
 import Overlay from "./components/Overlay";
 import Cat from "./components/cat";
-import { GoogleLogin } from "@react-oauth/google";
 import { useGoogleLogin } from "@react-oauth/google";
-import { getUpcomingMeetings } from "./calendar/googleCalendar";
+import { getUpcomingMeetings } from "./services/calendar";
 
 
 
@@ -13,6 +12,7 @@ export default function App() {
   const [showCat, setShowCat] = useState(false);
   const [showReminder, setShowReminder] = useState(false);
   const [meetings, setMeetings] = useState([]);
+  const [nextMeeting, setNextMeeting] = useState(null);
 
   const handleReminder = () => {
     setShowCat(true);
@@ -27,22 +27,52 @@ export default function App() {
     scope: "https://www.googleapis.com/auth/calendar.readonly",
 
     onSuccess: async (tokenResponse) => {
-      console.log("ACCESS TOKEN", tokenResponse);
+      try {
+        const calendarData = await getUpcomingMeetings(
+          tokenResponse.access_token
+        );
 
-      const meetings = await getUpcomingMeetings(
-        tokenResponse.access_token
-      );
+        const now = new Date();
 
-      console.log(meetings);
+        const upcomingMeetings = calendarData.items.filter(
+          (meeting) => {
+            if (!meeting.start?.dateTime) return false;
 
-      console.log(meetings.items);
-      const upcomingMeetings = meetings.items.map((meeting) => ({
-        title: meeting.summary,
-        start: meeting.start?.dateTime || meeting.start?.date,
-      }));
-      setMeetings(upcomingMeetings);
+            return (
+              new Date(meeting.start.dateTime) > now
+            );
+          }
+        );
 
-      console.log(upcomingMeetings);
+        const nearestMeeting = upcomingMeetings[0];
+
+        if (!nearestMeeting) {
+          alert("No upcoming meetings today");
+          return;
+        }
+
+        const meetingTime = new Date(
+          nearestMeeting.start.dateTime
+        );
+
+        const minutesRemaining = Math.floor(
+          (meetingTime - now) / (1000 * 60)
+        );
+
+        setNextMeeting({
+          title: nearestMeeting.summary,
+          minutesRemaining,
+        });
+
+        if (minutesRemaining <15 ) {
+          handleReminder();
+        }
+      } catch (error) {
+        console.error(
+          "Failed to fetch meetings",
+          error
+        );
+      }
     },
   });
 
@@ -58,12 +88,27 @@ export default function App() {
       <button onClick={() => login()}>
         Connect Google Calendar
       </button>
-      {/* {meetings.map((meeting) => (
-        <div key={meeting.start}>
-          <h4>{meeting.title}</h4>
-          <p>{meeting.start}</p>
-        </div>
-      ))} */}
+      {nextMeeting && (
+        <div
+          style={{
+            marginTop: "20px",
+            padding: "16px",
+            border: "1px solid #ddd",
+            borderRadius: "8px",
+            width: "400px",
+            marginInline: "auto",
+          }}
+        >
+          <h3>📅 Next Meeting</h3>
+
+          <p>
+            <strong>{nextMeeting.title}</strong>
+          </p>
+
+          <p>
+            Starts in {nextMeeting.minutesRemaining} mins
+          </p>
+        </div>)}
 
       <button
         onClick={handleReminder}
@@ -78,7 +123,11 @@ export default function App() {
 
       {showCat && <Overlay />}
       {showCat && <Cat />}
-      {showReminder && <Reminder />}
-    </div>
+      {showReminder && nextMeeting && (
+        <Reminder
+          title={nextMeeting.title}
+          minutesRemaining={nextMeeting.minutesRemaining}
+        />
+      )}    </div>
   );
 }
