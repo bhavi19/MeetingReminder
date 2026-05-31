@@ -1,80 +1,105 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Reminder from "./components/Reminder";
 import { playMeow } from "./utils/playAudio";
 import Overlay from "./components/Overlay";
 import Cat from "./components/cat";
 import { useGoogleLogin } from "@react-oauth/google";
 import { getUpcomingMeetings } from "./services/calendar";
+import { useAuthStore } from "./store/authStore";
+import { useReminderStore } from "./store/reminderStore";
+import { useReminder } from "./hooks/useReminder";
+import { useCalendar } from "./hooks/useCalendar";
 
 
 
 export default function App() {
-  const [showCat, setShowCat] = useState(false);
-  const [showReminder, setShowReminder] = useState(false);
+
   const [meetings, setMeetings] = useState([]);
-  const [nextMeeting, setNextMeeting] = useState(null);
+  const { handleReminder } =
+    useReminder();
 
-  const handleReminder = () => {
-    setShowCat(true);
+  const { checkMeetings } =
+    useCalendar(handleReminder);
+  const showCat = useReminderStore(
+    (state) => state.showCat
+  );
 
-    setTimeout(() => {
-      playMeow();
-      setShowReminder(true);
-    }, 2000);
-  };
+  const setShowCat = useReminderStore(
+    (state) => state.setShowCat
+  );
+
+  const showReminder = useReminderStore(
+    (state) => state.showReminder
+  );
+
+  const setShowReminder = useReminderStore(
+    (state) => state.setShowReminder
+  );
+
+  const nextMeeting = useReminderStore(
+    (state) => state.nextMeeting
+  );
+
+  const setNextMeeting = useReminderStore(
+    (state) => state.setNextMeeting
+  );
+
+  const triggeredReminders =
+    useReminderStore(
+      (state) => state.triggeredReminders
+    );
+
+  const addTriggeredReminder =
+    useReminderStore(
+      (state) => state.addTriggeredReminder
+    );
+  const accessToken = useAuthStore(
+    (state) => state.accessToken
+  );
+  const setAccessToken = useAuthStore(
+    (state) => state.setAccessToken
+  );
 
   const login = useGoogleLogin({
     scope: "https://www.googleapis.com/auth/calendar.readonly",
 
     onSuccess: async (tokenResponse) => {
-      try {
-        const calendarData = await getUpcomingMeetings(
-          tokenResponse.access_token
-        );
+      localStorage.setItem(
+        "token",
+        tokenResponse.access_token
+      );
 
-        const now = new Date();
+      setAccessToken(
+        tokenResponse.access_token
+      );
 
-        const upcomingMeetings = calendarData.items.filter(
-          (meeting) => {
-            if (!meeting.start?.dateTime) return false;
-
-            return (
-              new Date(meeting.start.dateTime) > now
-            );
-          }
-        );
-
-        const nearestMeeting = upcomingMeetings[0];
-
-        if (!nearestMeeting) {
-          alert("No upcoming meetings today");
-          return;
-        }
-
-        const meetingTime = new Date(
-          nearestMeeting.start.dateTime
-        );
-
-        const minutesRemaining = Math.floor(
-          (meetingTime - now) / (1000 * 60)
-        );
-
-        setNextMeeting({
-          title: nearestMeeting.summary,
-          minutesRemaining,
-        });
-
-        if (minutesRemaining <15 ) {
-          handleReminder();
-        }
-      } catch (error) {
-        console.error(
-          "Failed to fetch meetings",
-          error
-        );
-      }
-    },
+      await checkMeetings(
+        tokenResponse.access_token
+      );
+    }
   });
+
+  useEffect(() => {
+    const token =
+      localStorage.getItem(
+        "token"
+      );
+
+    if (token) {
+      setAccessToken(token);
+      checkMeetings(token);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!accessToken) return;
+
+    const interval = setInterval(() => {
+      checkMeetings(accessToken);
+    }, 60000);
+
+    return () => clearInterval(interval);
+  }, [accessToken]);
 
   return (
     <div
