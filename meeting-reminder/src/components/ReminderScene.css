@@ -1,0 +1,162 @@
+.reminder-scene {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  box-sizing: border-box;
+  font-family: "Baloo 2", "Comic Sans MS", "Segoe UI", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.reminder-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  animation: reminderStackPop 0.5s cubic-bezier(0.18, 0.89, 0.32, 1.28) both;
+}
+
+.reminder-cat {
+  display: flex;
+  justify-content: center;
+}
+
+.reminder-cat img {
+  display: block;
+  width: clamp(260px, 62vw, 440px);
+  height: auto;
+  filter: drop-shadow(0 18px 26px rgba(0, 0, 0, 0.35))
+    sepia(0.18) saturate(1.15) hue-rotate(-8deg);
+  transform-origin: center bottom;
+  animation: reminderCatPop 0.55s cubic-bezier(0.18, 0.89, 0.32, 1.28)
+      both,
+    reminderCatFloat 3.4s ease-in-out 0.55s infinite;
+}
+
+/* message bubble that tucks under the cat */
+.reminder-bubble {
+  position: relative;
+  margin-top: -10px;
+  width: min(480px, 92vw);
+  background: #fffdf7;
+  border: 2px solid #ffe2a8;
+  border-radius: 26px;
+  padding: 14px 36px 16px;
+  text-align: center;
+  box-shadow: 0 10px 0 rgba(255, 226, 168, 0.45),
+    0 22px 50px rgba(0, 0, 0, 0.28);
+}
+
+.reminder-bubble::before {
+  content: "";
+  position: absolute;
+  top: -9px;
+  left: 50%;
+  width: 18px;
+  height: 18px;
+  background: #fffdf7;
+  border-left: 2px solid #ffe2a8;
+  border-top: 2px solid #ffe2a8;
+  border-radius: 6px 0 0 0;
+  transform: translateX(-50%) rotate(45deg);
+}
+
+.reminder-greeting {
+  position: relative;
+  margin: 0 0 4px;
+  font-size: 20px;
+  font-weight: 700;
+  color: #4a3b2a;
+}
+
+.reminder-message {
+  margin: 0 0 12px;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.35;
+  color: #5b4a35;
+}
+
+.reminder-meeting-name {
+  font-weight: 800;
+  color: #3a2e20;
+}
+
+.reminder-time {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 16px;
+  border-radius: 999px;
+  background: #e6f4ea;
+  color: #137333;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.reminder-time-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #34a853;
+  flex-shrink: 0;
+  animation: reminderPulse 1.4s ease-in-out infinite;
+}
+
+@keyframes reminderStackPop {
+  0% {
+    opacity: 0;
+    transform: translateY(22px) scale(0.94);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes reminderCatPop {
+  0% {
+    opacity: 0;
+    transform: translateY(40px) scale(0.5);
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(-6px) scale(1.06);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes reminderCatFloat {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-1.5deg);
+  }
+  50% {
+    transform: translateY(-7px) rotate(1.5deg);
+  }
+}
+
+@keyframes reminderPulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.6);
+    opacity: 0.5;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reminder-stack,
+  .reminder-cat img,
+  .reminder-time-dot {
+    animation: none;
+  }
+}

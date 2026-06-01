@@ -65,13 +65,16 @@ export const useCalendar = (
 
       const meetingId =
         nearestMeeting.id;
-
       if (
-        minutesRemaining <= 5 &&
-        minutesRemaining >= 4 &&
-        lastTriggeredMeetingId !==
-        nearestMeeting.id
-      ) {
+        true
+      )
+      // if (
+      //   minutesRemaining <= 5 &&
+      //   minutesRemaining >= 4 &&
+      //   lastTriggeredMeetingId !==
+      //   nearestMeeting.id
+      // )
+      {
         handleReminder();
 
         setLastTriggeredMeetingId(
@@ -92,16 +95,8 @@ export const useCalendar = (
       //   );
       // }
     } catch (error) {
-      if (
-        error?.response?.status === 401
-      ) {
-        throw new Error(
-          "TOKEN_EXPIRED"
-        );
-        setAuthExpired();
-        disconnect();
-      }
-
+      // The httpClient interceptor already clears auth on 401/403.
+      // Re-throw the original error so callers keep access to the status.
       throw error;
     }
   };

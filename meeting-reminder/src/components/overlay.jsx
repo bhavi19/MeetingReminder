@@ -4,8 +4,8 @@ export default function Overlay() {
             style={{
                 position: "fixed",
                 inset: 0,
-                background:"rgba(0,0,0,0.25)",
-                backdropFilter: "blur(4px)",
+                background:"rgba(0,0,0,0.18)",
+                backdropFilter: "blur(2px)",
                 zIndex: 100,
             }}
         />

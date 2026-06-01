@@ -30,7 +30,7 @@ export const getUpcomingMeetings = async (
 export const getUserProfile = async (
   accessToken
 ) => {
-  const response = await axios.get(
+  const response = await httpClient.get(
     "https://www.googleapis.com/oauth2/v2/userinfo",
     {
       headers: {

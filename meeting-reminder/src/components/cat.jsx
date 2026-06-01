@@ -1,20 +1,9 @@
 export default function Cat() {
   return (
-    <div
-      style={{
-        position: "fixed",
-        top: "50%",
-        left: "35%",
-        transform: "translate(-50%, -50%)",
-        zIndex: 200,
-      }}
-    >
+    <div className="reminder-cat">
       <img
         src="/cat.gif"
-        alt="MeetCat"
-        style={{
-          width: "350px",
-        }}
+        alt="A cat walking across a laptop keyboard"
       />
     </div>
   );
