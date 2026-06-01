@@ -1,27 +1,15 @@
-import { playMeow } from "../utils/playAudio";
 import { useReminderStore } from "../store/reminderStore";
 
 export const useReminder = () => {
-  const setShowCat = useReminderStore(
-    (state) => state.setShowCat
-  );
-
-  const setShowReminder = useReminderStore(
-    (state) => state.setShowReminder
+  const setShowReminderScene = useReminderStore(
+    (state) => state.setShowReminderScene
   );
 
   const handleReminder = () => {
-    setShowCat(true);
-    setShowReminder(false);
+    setShowReminderScene(true);
 
     setTimeout(() => {
-      playMeow();
-      setShowReminder(true);
-    }, 2000);
-
-    setTimeout(() => {
-      setShowCat(false);
-      setShowReminder(false);
+      setShowReminderScene(false);
     }, 4000);
   };
 

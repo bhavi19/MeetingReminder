@@ -1,9 +1,6 @@
 import "./SetupScreen.css";
-import { useAuthStore } from "../store/authStore";
+
 export default function SetupScreen({ onConnect }) {
-    const user = useAuthStore(
-        (state) => state.user
-    );
     return (
         <div className="setup-screen">
             <div className="setup-card">

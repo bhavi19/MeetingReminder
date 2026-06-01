@@ -16,10 +16,7 @@ export default function ReminderScene({
     return (
         <>
             <Overlay />
-            <div
-                className="reminder-scene"
-                onClick={playMeow}
-            >
+            <div className="reminder-scene">
                 <div
                     className="reminder-glow"
                     aria-hidden="true"

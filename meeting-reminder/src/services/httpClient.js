@@ -16,7 +16,6 @@ httpClient.interceptors.response.use(
     if (status === 401 || status === 403) {
       localStorage.removeItem("token");
       useAuthStore.getState().clearAccessToken();
-      useAuthStore.getState().setAuthExpired();
     }
 
     return Promise.reject(error);
