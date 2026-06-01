@@ -14,24 +14,24 @@ export default function SetupScreen({ onConnect }) {
                 <h1 className="setup-title">Snooze Cat</h1>
 
                 <p className="setup-subtitle">
-                    Your friendly meeting companion. A gentle cat appears
-                    <strong> 5 minutes before</strong> every meeting — so you never
-                    miss one again.
+                    A cute Kitty pops in{" "}
+                    <strong>5 minutes before</strong> each meeting — so
+                    you&apos;re never caught off guard.
                 </p>
 
                 <ul className="setup-features">
                     <li>
                         <span className="setup-feature-dot setup-dot-blue" />
-                        Smart 5-minute reminders
+                        5-minute heads-up
                     </li>
                     <li>
                         <span className="setup-feature-dot setup-dot-green" />
                         Syncs with Google Calendar
                     </li>
-                    <li>
+                    {/* <li>
                         <span className="setup-feature-dot setup-dot-yellow" />
-                        Calm, distraction-free nudges
-                    </li>
+                        Gentle, quiet nudges
+                    </li> */}
                 </ul>
 
                 <button
