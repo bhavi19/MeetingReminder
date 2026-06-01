@@ -16,34 +16,51 @@ export default function Reminder({
     Math.round(minutesRemaining ?? 0)
   );
 
+  const meetingTitle =
+    title || "Your meeting";
+
   const timeLabel =
     minutes <= 0
       ? "Starting now"
-      : `Starts in ${minutes} ${minutes === 1 ? "minute" : "minutes"
-      }`;
+      : `${minutes} ${minutes === 1 ? "minute" : "minutes"
+        }`;
 
   return (
-    <div className="reminder-bubble">
-      <p className="reminder-greeting">
-        Hey{firstName ? ` ${firstName}` : " there"}! 🐾
-      </p>
-
-      <p className="reminder-message">
-        Your meeting{" "}
-        <span className="reminder-meeting-name">
-          “{title || "Your meeting"}”
-        </span>{" "}
-        {minutes <= 0
-          ? "is starting now."
-          : "is coming up soon."}
-      </p>
-
-      <div className="reminder-time">
+    <div className="reminder-bubble-wrap">
+      <div className="reminder-bubble">
         <span
-          className="reminder-time-dot"
+          className="reminder-paw-sticker"
           aria-hidden="true"
-        />
-        {timeLabel}
+        >
+          🐾
+        </span>
+        <p className="reminder-message">
+          Hii{firstName ? ` ${firstName}` : ""}! You
+          have —{" "}
+          <span className="reminder-meeting-name">
+            {meetingTitle}
+          </span>{" "}
+          {minutes <= 0 ? (
+            <span className="reminder-time">
+              <span
+                className="reminder-time-dot"
+                aria-hidden="true"
+              />
+              {timeLabel}
+            </span>
+          ) : (
+            <>
+              in{" "}
+              <span className="reminder-time">
+                <span
+                  className="reminder-time-dot"
+                  aria-hidden="true"
+                />
+                {timeLabel}
+              </span>
+            </>
+          )}
+        </p>
       </div>
     </div>
   );

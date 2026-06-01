@@ -21,6 +21,10 @@ export default function ReminderScene({
                 onClick={playMeow}
             >
                 <div
+                    className="reminder-glow"
+                    aria-hidden="true"
+                />
+                <div
                     className="reminder-stack"
                     role="alert"
                     aria-live="assertive"
