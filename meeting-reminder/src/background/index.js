@@ -1,10 +1,13 @@
 import {
   clearSession,
   getLastTriggeredMeetingId,
-  getSession,
   saveNextMeeting,
   setLastTriggeredMeetingId,
 } from "../shared/storage.js";
+import {
+  getAccessToken,
+  removeCachedAuthToken,
+} from "../shared/extensionAuth.js";
 import {
   AuthError,
   evaluateMeetings,
@@ -31,35 +34,52 @@ async function showReminderOnActiveTab(
   }
 }
 
+async function checkWithToken(token) {
+  const calendarData =
+    await fetchUpcomingMeetings(token);
+  const lastTriggeredMeetingId =
+    await getLastTriggeredMeetingId();
+
+  const {
+    nextMeeting,
+    shouldRemind,
+    meetingId,
+  } = evaluateMeetings(
+    calendarData,
+    lastTriggeredMeetingId
+  );
+
+  if (nextMeeting) {
+    await saveNextMeeting(nextMeeting);
+  }
+
+  if (shouldRemind && nextMeeting) {
+    await setLastTriggeredMeetingId(meetingId);
+    await showReminderOnActiveTab(nextMeeting);
+  }
+}
+
 export async function runMeetingCheck() {
-  const { token } = await getSession();
-  if (!token) return;
+  let token;
 
   try {
-    const calendarData =
-      await fetchUpcomingMeetings(token);
-    const lastTriggeredMeetingId =
-      await getLastTriggeredMeetingId();
+    token = await getAccessToken(false);
+  } catch {
+    return;
+  }
 
-    const {
-      nextMeeting,
-      shouldRemind,
-      meetingId,
-    } = evaluateMeetings(
-      calendarData,
-      lastTriggeredMeetingId
-    );
-
-    if (nextMeeting) {
-      await saveNextMeeting(nextMeeting);
-    }
-
-    if (shouldRemind && nextMeeting) {
-      await setLastTriggeredMeetingId(meetingId);
-      await showReminderOnActiveTab(nextMeeting);
-    }
+  try {
+    await checkWithToken(token);
   } catch (error) {
-    if (error instanceof AuthError) {
+    if (!(error instanceof AuthError)) return;
+
+    // Token may be stale — invalidate and let Chrome issue a fresh one.
+    await removeCachedAuthToken(token);
+
+    try {
+      const freshToken = await getAccessToken(false);
+      await checkWithToken(freshToken);
+    } catch {
       await clearSession();
     }
   }

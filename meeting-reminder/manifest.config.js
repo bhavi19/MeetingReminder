@@ -19,7 +19,7 @@ export default {
       run_at: "document_idle",
     },
   ],
-  permissions: ["storage", "alarms", "tabs"],
+  permissions: ["storage", "alarms", "tabs", "identity"],
   host_permissions: ["https://www.googleapis.com/*"],
   web_accessible_resources: [
     {

@@ -1,11 +1,14 @@
-import { useEffect } from "react";
-import { useGoogleLogin } from "@react-oauth/google";
+import { useEffect, useState } from "react";
 import { useAuthStore } from "../store/authStore";
 import { useReminderStore } from "../store/reminderStore";
 import SetupScreen from "../components/setupScreen";
 import ConnectedScreen from "../components/connectedScreen";
 import { getUserProfile } from "../services/calendar";
 import {
+  getAccessToken,
+} from "../shared/extensionAuth";
+import {
+  clearSession,
   getNextMeeting,
   getSession,
   saveSession,
@@ -13,6 +16,10 @@ import {
 import "./popup.css";
 
 export default function PopupApp() {
+  const [isConnecting, setIsConnecting] =
+    useState(false);
+  const [authError, setAuthError] = useState(null);
+
   const accessToken = useAuthStore(
     (state) => state.accessToken
   );
@@ -26,39 +33,49 @@ export default function PopupApp() {
     (state) => state.setNextMeeting
   );
 
-  const login = useGoogleLogin({
-    scope:
-      "https://www.googleapis.com/auth/calendar.readonly",
+  const connect = async () => {
+    setIsConnecting(true);
+    setAuthError(null);
 
-    onSuccess: async (tokenResponse) => {
-      const profile = await getUserProfile(
-        tokenResponse.access_token
-      );
+    try {
+      const token = await getAccessToken(true);
+      const profile = await getUserProfile(token);
 
       setUser(profile);
-      setAccessToken(tokenResponse.access_token);
-      await saveSession(
-        tokenResponse.access_token,
-        profile
-      );
+      setAccessToken(token);
+      await saveSession(profile);
 
       chrome.runtime.sendMessage({
         type: "CHECK_MEETINGS",
       });
-    },
-  });
+    } catch {
+      setAuthError(
+        "Could not connect. Please try again."
+      );
+      setAccessToken(null);
+      setUser(null);
+      await clearSession();
+    } finally {
+      setIsConnecting(false);
+    }
+  };
 
   useEffect(() => {
     const hydrate = async () => {
-      const [{ token, user }, nextMeeting] =
-        await Promise.all([
-          getSession(),
-          getNextMeeting(),
-        ]);
+      try {
+        const [token, { user }, nextMeeting] =
+          await Promise.all([
+            getAccessToken(false),
+            getSession(),
+            getNextMeeting(),
+          ]);
 
-      if (token) setAccessToken(token);
-      if (user) setUser(user);
-      if (nextMeeting) setNextMeeting(nextMeeting);
+        setAccessToken(token);
+        if (user) setUser(user);
+        if (nextMeeting) setNextMeeting(nextMeeting);
+      } catch {
+        setAccessToken(null);
+      }
     };
 
     hydrate();
@@ -66,7 +83,16 @@ export default function PopupApp() {
 
   if (!accessToken) {
     return (
-      <SetupScreen onConnect={() => login()} />
+      <>
+        <SetupScreen
+          onConnect={() => {
+            if (!isConnecting) connect();
+          }}
+        />
+        {authError && (
+          <p className="popup-auth-error">{authError}</p>
+        )}
+      </>
     );
   }
 

@@ -19,15 +19,15 @@ export const useCalendar = (handleReminder) => {
 
     const now = new Date();
 
-    const upcomingMeetings = calendarData.items.filter(
-      (meeting) => {
-        if (!meeting.start?.dateTime) return false;
+    const upcomingMeetings = (
+      calendarData.items ?? []
+    ).filter((meeting) => {
+      if (!meeting.start?.dateTime) return false;
 
-        return (
-          new Date(meeting.start.dateTime) > now
-        );
-      }
-    );
+      return (
+        new Date(meeting.start.dateTime) > now
+      );
+    });
 
     const nearestMeeting = upcomingMeetings[0];
     if (!nearestMeeting) return;

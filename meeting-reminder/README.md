@@ -40,9 +40,14 @@ Uses `index.html` + `App.jsx` for local browser testing without the extension sh
 
 ## Google OAuth setup
 
-1. Create a **Chrome extension** OAuth client in Google Cloud Console (use your extension ID from `chrome://extensions`).
-2. Add `http://localhost:5173/*` for local extension dev if needed.
-3. Set `VITE_GOOGLE_CLIENT_ID` in `.env`.
+Chrome keeps users signed in by refreshing tokens automatically via `chrome.identity`.
+
+1. In [Google Cloud Console](https://console.cloud.google.com/), create an OAuth client of type **Chrome extension**.
+2. Use your extension ID from `chrome://extensions` (Load unpacked first to get the ID).
+3. Add the same client ID to `.env` as `VITE_GOOGLE_CLIENT_ID` (used in `manifest.config.js` → `oauth2.client_id`).
+4. Enable the **Google Calendar API** for your project.
+
+Users sign in once; Chrome refreshes access tokens in the background. They only see Connect again if they revoke access or clear extension data.
 
 ## How it works
 

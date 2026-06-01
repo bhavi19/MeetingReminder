@@ -1,3 +1,5 @@
+import { clearAllAuthTokens } from "./extensionAuth.js";
+
 const isExtension =
   typeof chrome !== "undefined" &&
   Boolean(chrome.storage?.local);
@@ -66,8 +68,17 @@ export async function getSession() {
   };
 }
 
-export async function saveSession(token, user) {
-  await storageSet({ token, user });
+export async function saveSession(tokenOrUser, user) {
+  // Extension: save profile only — Chrome identity holds the token.
+  if (user === undefined) {
+    await storageSet({ user: tokenOrUser });
+    return;
+  }
+
+  await storageSet({
+    token: tokenOrUser,
+    user,
+  });
 }
 
 export async function clearSession() {
@@ -77,6 +88,10 @@ export async function clearSession() {
     "nextMeeting",
     "lastTriggeredMeetingId",
   ]);
+
+  if (isExtension) {
+    await clearAllAuthTokens();
+  }
 }
 
 export async function getLastTriggeredMeetingId() {

@@ -14,3 +14,11 @@ body,
 .setup-card {
   max-width: none;
 }
+
+.popup-auth-error {
+  margin: 0;
+  padding: 0 16px 16px;
+  text-align: center;
+  font-size: 13px;
+  color: #d93025;
+}
