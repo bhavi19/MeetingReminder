@@ -1,3 +1,5 @@
+import { assetUrl } from "../utils/assetUrl.js";
+
 export default function Cat() {
   return (
     <div className="reminder-cat-wrap">
@@ -7,7 +9,7 @@ export default function Cat() {
       />
       <div className="reminder-cat">
         <img
-          src="/cat.gif"
+          src={assetUrl("cat.gif")}
           alt="A cat walking across a laptop keyboard"
         />
       </div>

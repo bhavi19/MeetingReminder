@@ -1,5 +1,5 @@
 import axios from "axios";
-import { useAuthStore } from "../store/authStore";
+import { clearSession } from "../shared/storage.js";
 
 const httpClient = axios.create({
   timeout: 10000,
@@ -7,12 +7,11 @@ const httpClient = axios.create({
 
 httpClient.interceptors.response.use(
   (response) => response,
-  (error) => {
+  async (error) => {
     const status = error?.response?.status;
 
     if (status === 401 || status === 403) {
-      localStorage.removeItem("token");
-      useAuthStore.getState().clearSession();
+      await clearSession();
     }
 
     return Promise.reject(error);

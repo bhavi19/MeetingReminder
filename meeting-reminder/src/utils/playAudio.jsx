@@ -1,18 +1,16 @@
+import { assetUrl } from "./assetUrl.js";
+
 let audio;
 let unlocked = false;
 
 const getAudio = () => {
   if (!audio) {
-    audio = new Audio("/meow.mp3");
+    audio = new Audio(assetUrl("meow.mp3"));
     audio.preload = "auto";
   }
   return audio;
 };
 
-// Browsers block audio playback until the user interacts with the page.
-// We "unlock" the audio element during the first real user gesture so that
-// later reminder-triggered playback (which happens from a timer, with no
-// gesture) is allowed.
 const unlockAudio = () => {
   if (unlocked) return;
 

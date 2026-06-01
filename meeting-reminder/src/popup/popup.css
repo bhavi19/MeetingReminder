@@ -1,0 +1,16 @@
+html,
+body,
+#root {
+  margin: 0;
+  width: 380px;
+  min-height: 520px;
+}
+
+.setup-screen {
+  min-height: 520px;
+  padding: 16px;
+}
+
+.setup-card {
+  max-width: none;
+}

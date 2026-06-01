@@ -8,6 +8,10 @@ import SetupScreen from "./components/setupScreen";
 import ConnectedScreen from "./components/connectedScreen";
 import ReminderScene from "./components/reminderScreen";
 import { getUserProfile } from "./services/calendar";
+import {
+  getSession,
+  saveSession,
+} from "./shared/storage";
 
 export default function App() {
   const { handleReminder } = useReminder();
@@ -30,7 +34,8 @@ export default function App() {
   );
 
   const login = useGoogleLogin({
-    scope: "https://www.googleapis.com/auth/calendar.readonly",
+    scope:
+      "https://www.googleapis.com/auth/calendar.readonly",
 
     onSuccess: async (tokenResponse) => {
       const profile = await getUserProfile(
@@ -39,9 +44,9 @@ export default function App() {
 
       setUser(profile);
       setAccessToken(tokenResponse.access_token);
-      localStorage.setItem(
-        "token",
-        tokenResponse.access_token
+      await saveSession(
+        tokenResponse.access_token,
+        profile
       );
 
       await checkMeetings(tokenResponse.access_token);
@@ -49,13 +54,19 @@ export default function App() {
   });
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) return;
+    const hydrate = async () => {
+      const { token, user } = await getSession();
+      if (!token) return;
 
-    setAccessToken(token);
-    checkMeetings(token).catch(() => {
-      // 401/403 clears session via httpClient interceptor
-    });
+      setAccessToken(token);
+      if (user) setUser(user);
+
+      checkMeetings(token).catch(() => {
+        // 401/403 clears session via httpClient interceptor
+      });
+    };
+
+    hydrate();
   }, []);
 
   useEffect(() => {
