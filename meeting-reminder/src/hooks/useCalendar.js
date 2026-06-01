@@ -8,14 +8,16 @@ export const useCalendar = (
     (state) => state.setNextMeeting
   );
 
-  const triggeredReminders =
+  const lastTriggeredMeetingId =
     useReminderStore(
-      (state) => state.triggeredReminders
+      (state) =>
+        state.lastTriggeredMeetingId
     );
 
-  const addTriggeredReminder =
+  const setLastTriggeredMeetingId =
     useReminderStore(
-      (state) => state.addTriggeredReminder
+      (state) =>
+        state.setLastTriggeredMeetingId
     );
 
   const checkMeetings = async (token) => {
@@ -53,7 +55,7 @@ export const useCalendar = (
       const minutesRemaining =
         Math.floor(
           (meetingTime - now) /
-            (1000 * 60)
+          (1000 * 60)
         );
 
       setNextMeeting({
@@ -66,31 +68,41 @@ export const useCalendar = (
 
       if (
         minutesRemaining <= 5 &&
-        !triggeredReminders.includes(
-          `${meetingId}-5`
-        )
+        minutesRemaining >= 4 &&
+        lastTriggeredMeetingId !==
+        nearestMeeting.id
       ) {
         handleReminder();
 
-        addTriggeredReminder(
-          `${meetingId}-5`
+        setLastTriggeredMeetingId(
+          nearestMeeting.id
         );
       }
 
-      if (
-        minutesRemaining <= 3 &&
-        !triggeredReminders.includes(
-          `${meetingId}-3`
-        )
-      ) {
-        handleReminder();
+      // if (
+      //   minutesRemaining <= 3 &&
+      //   !triggeredReminders.includes(
+      //     `${meetingId}-3`
+      //   )
+      // ) {
+      //   handleReminder();
 
-        addTriggeredReminder(
-          `${meetingId}-3`
-        );
-      }
+      //   addTriggeredReminder(
+      //     `${meetingId}-3`
+      //   );
+      // }
     } catch (error) {
-      console.error(error);
+      if (
+        error?.response?.status === 401
+      ) {
+        throw new Error(
+          "TOKEN_EXPIRED"
+        );
+        setAuthExpired();
+        disconnect();
+      }
+
+      throw error;
     }
   };
 

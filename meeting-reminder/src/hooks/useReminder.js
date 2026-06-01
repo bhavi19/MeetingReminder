@@ -17,7 +17,7 @@ export const useReminder = () => {
     setTimeout(() => {
       playMeow();
       setShowReminder(true);
-    }, 1000);
+    }, 2000);
 
     setTimeout(() => {
       setShowCat(false);

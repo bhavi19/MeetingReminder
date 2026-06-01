@@ -11,20 +11,27 @@ export default function Reminder({
         transform: "translate(-50%, -50%)",
 
         width: "350px",
+
         background: "#22c55e",
         color: "white",
+
         padding: "20px",
+
         borderRadius: "16px",
 
-        boxShadow: "0 10px 25px rgba(0,0,0,0.2)",
+        boxShadow:
+          "0 10px 25px rgba(0,0,0,0.2)",
 
         zIndex: 300,
       }}
     >
-      <h3>🐱 Meow Bhaviii!</h3>
+      <h3>
+        🐱 Hii Bhaviii!
+      </h3>
 
       <p>
-        {title} starts in {minutesRemaining} mins.
+        {title} starts in{" "}
+        {minutesRemaining} mins.
       </p>
     </div>
   );

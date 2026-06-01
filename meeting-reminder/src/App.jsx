@@ -4,12 +4,13 @@ import { playMeow } from "./utils/playAudio";
 import Overlay from "./components/Overlay";
 import Cat from "./components/cat";
 import { useGoogleLogin } from "@react-oauth/google";
-import { getUpcomingMeetings } from "./services/calendar";
 import { useAuthStore } from "./store/authStore";
 import { useReminderStore } from "./store/reminderStore";
 import { useReminder } from "./hooks/useReminder";
 import { useCalendar } from "./hooks/useCalendar";
-
+import SetupScreen from "./components/setupScreen";
+import ConnectedScreen from "./components/ConnectedScreen";
+import ReminderScene from "./components/reminderScreen";
 
 
 export default function App() {
@@ -59,6 +60,11 @@ export default function App() {
   const setAccessToken = useAuthStore(
     (state) => state.setAccessToken
   );
+  const clearAccessToken = useAuthStore(
+    (state) => state.clearAccessToken
+  );
+
+
 
   const login = useGoogleLogin({
     scope: "https://www.googleapis.com/auth/calendar.readonly",
@@ -73,86 +79,93 @@ export default function App() {
         tokenResponse.access_token
       );
 
-      await checkMeetings(
-        tokenResponse.access_token
-      );
+      try {
+        await checkMeetings(tokenResponse.access_token);
+      } catch (error) {
+        if (
+          error.message ===
+          "TOKEN_EXPIRED"
+        ) {
+          disconnect();
+        }
+      }
     }
   });
+  const disconnect = () => {
+    localStorage.removeItem(
+      "token"
+    );
+
+    clearAccessToken();
+  };
 
   useEffect(() => {
     const token =
-      localStorage.getItem(
-        "token"
-      );
+      localStorage.getItem("token");
 
-    if (token) {
-      setAccessToken(token);
-      checkMeetings(token);
-    }
+    if (!token) return;
+
+    const loadMeetings = async () => {
+      try {
+        setAccessToken(token);
+
+        await checkMeetings(token);
+      } catch (error) {
+        if (
+          error?.response?.status === 401
+        ) {
+          disconnect();
+        }
+      }
+    };
+
+    loadMeetings();
   }, []);
-
   useEffect(() => {
     if (!accessToken) return;
 
-    const interval = setInterval(() => {
-      checkMeetings(accessToken);
-    }, 60000);
+    const interval = setInterval(
+      async () => {
+        try {
+          await checkMeetings(
+            accessToken
+          );
+        } catch (error) {
+          if (
+            error?.response?.status ===
+            401
+          ) {
+            disconnect();
+          }
+        }
+      },
+      60000
+    );
 
     return () => clearInterval(interval);
   }, [accessToken]);
 
+  if (showCat || showReminder) {
+    return (
+      <ReminderScene
+        nextMeeting={nextMeeting}
+      />
+    );
+  }
+
+  if (!accessToken) {
+    return (
+      <SetupScreen
+        onConnect={() => login()}
+      />
+    );
+  }
+
   return (
-    <div
-      style={{
-        padding: "40px",
-        textAlign: "center",
-      }}
-    >
-
-      <h1>🐱 MeetCat</h1>
-      <button onClick={() => login()}>
-        Connect Google Calendar
-      </button>
-      {nextMeeting && (
-        <div
-          style={{
-            marginTop: "20px",
-            padding: "16px",
-            border: "1px solid #ddd",
-            borderRadius: "8px",
-            width: "400px",
-            marginInline: "auto",
-          }}
-        >
-          <h3>📅 Next Meeting</h3>
-
-          <p>
-            <strong>{nextMeeting.title}</strong>
-          </p>
-
-          <p>
-            Starts in {nextMeeting.minutesRemaining} mins
-          </p>
-        </div>)}
-
-      <button
-        onClick={handleReminder}
-        style={{
-          padding: "12px 24px",
-          cursor: "pointer",
-          borderRadius: "8px",
-        }}
-      >
-        Test Reminder
-      </button>
-
-      {showCat && <Overlay />}
-      {showCat && <Cat />}
-      {showReminder && nextMeeting && (
-        <Reminder
-          title={nextMeeting.title}
-          minutesRemaining={nextMeeting.minutesRemaining}
-        />
-      )}    </div>
+    <ConnectedScreen
+      nextMeeting={nextMeeting}
+      onDisconnect={disconnect}
+    />
   );
+
 }

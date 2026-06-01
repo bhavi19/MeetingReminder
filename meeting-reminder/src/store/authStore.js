@@ -7,5 +7,15 @@ export const useAuthStore = create(
       set({
         accessToken: token,
       }),
-  })
+    clearAccessToken: () =>
+      set({
+        accessToken: null,
+      }),
+    authExpired: false,
+
+    setAuthExpired: () =>
+      set({
+        authExpired: true,
+      }),
+  }),
 );

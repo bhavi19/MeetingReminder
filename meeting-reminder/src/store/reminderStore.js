@@ -4,7 +4,7 @@ export const useReminderStore = create((set) => ({
   showCat: false,
   showReminder: false,
   nextMeeting: null,
-  triggeredReminders: [],
+  lastTriggeredMeetingId: null,
 
   setShowCat: (showCat) =>
     set({ showCat }),
@@ -22,4 +22,18 @@ export const useReminderStore = create((set) => ({
         reminderId,
       ],
     })),
+  resetReminderStore: () =>
+    set({
+      showCat: false,
+      showReminder: false,
+      nextMeeting: null,
+      triggeredReminders: [],
+    }),
+  setLastTriggeredMeetingId: (
+    meetingId
+  ) =>
+    set({
+      lastTriggeredMeetingId:
+        meetingId,
+    }),
 }));
