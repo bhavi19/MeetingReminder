@@ -26,7 +26,8 @@ export default function Reminder({
       }}
     >
       <h3>
-        🐱 Hii Bhaviii!
+        🐱 Hii{" "}
+        {user?.name?.split(" ")[0]}!
       </h3>
 
       <p>

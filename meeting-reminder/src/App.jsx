@@ -11,6 +11,7 @@ import { useCalendar } from "./hooks/useCalendar";
 import SetupScreen from "./components/setupScreen";
 import ConnectedScreen from "./components/ConnectedScreen";
 import ReminderScene from "./components/reminderScreen";
+import { getUserProfile } from "./services/calendar";
 
 
 export default function App() {
@@ -70,26 +71,26 @@ export default function App() {
     scope: "https://www.googleapis.com/auth/calendar.readonly",
 
     onSuccess: async (tokenResponse) => {
-      localStorage.setItem(
-        "token",
-        tokenResponse.access_token
-      );
+      console.log("LOGIN SUCCESS");
+
+      const profile =
+        await getUserProfile(
+          tokenResponse.access_token
+        );
+
+      console.log(profile);
+
+      setUser(profile);
 
       setAccessToken(
         tokenResponse.access_token
       );
 
-      try {
-        await checkMeetings(tokenResponse.access_token);
-      } catch (error) {
-        if (
-          error.message ===
-          "TOKEN_EXPIRED"
-        ) {
-          disconnect();
-        }
-      }
+      await checkMeetings(
+        tokenResponse.access_token
+      );
     }
+
   });
   const disconnect = () => {
     localStorage.removeItem(

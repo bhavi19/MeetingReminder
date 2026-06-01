@@ -25,3 +25,19 @@ export const getUpcomingMeetings = async (
 
   return response.data;
 };
+
+
+export const getUserProfile = async (
+  accessToken
+) => {
+  const response = await axios.get(
+    "https://www.googleapis.com/oauth2/v2/userinfo",
+    {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    }
+  );
+
+  return response.data;
+};

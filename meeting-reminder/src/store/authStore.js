@@ -11,6 +11,10 @@ export const useAuthStore = create(
       set({
         accessToken: null,
       }),
+    setUser: (user) =>
+      set({
+        user,
+      }),
     authExpired: false,
 
     setAuthExpired: () =>
