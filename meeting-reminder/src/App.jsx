@@ -25,9 +25,6 @@ export default function App() {
   const setAccessToken = useAuthStore(
     (state) => state.setAccessToken
   );
-  const clearAccessToken = useAuthStore(
-    (state) => state.clearAccessToken
-  );
   const setUser = useAuthStore(
     (state) => state.setUser
   );
@@ -51,18 +48,13 @@ export default function App() {
     },
   });
 
-  const disconnect = () => {
-    localStorage.removeItem("token");
-    clearAccessToken();
-  };
-
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) return;
 
     setAccessToken(token);
     checkMeetings(token).catch(() => {
-      // 401/403 is handled by the httpClient interceptor
+      // 401/403 clears session via httpClient interceptor
     });
   }, []);
 
@@ -71,7 +63,7 @@ export default function App() {
 
     const interval = setInterval(() => {
       checkMeetings(accessToken).catch(() => {
-        // 401/403 is handled by the httpClient interceptor
+        // 401/403 clears session via httpClient interceptor
       });
     }, 60000);
 
@@ -90,7 +82,5 @@ export default function App() {
     );
   }
 
-  return (
-    <ConnectedScreen onDisconnect={disconnect} />
-  );
+  return <ConnectedScreen />;
 }

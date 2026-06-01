@@ -7,9 +7,9 @@ export const useAuthStore = create((set) => ({
   setAccessToken: (token) =>
     set({ accessToken: token }),
 
-  clearAccessToken: () =>
-    set({ accessToken: null }),
-
   setUser: (user) =>
     set({ user }),
+
+  clearSession: () =>
+    set({ accessToken: null, user: null }),
 }));
